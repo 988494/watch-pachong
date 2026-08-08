@@ -4,6 +4,7 @@ import csv
 import requests
 from playwright.sync_api import sync_playwright
 
+
 def scrape_product(url, category_slug, product_code):
     print(f"Scraping URL: {url}")
 
@@ -15,7 +16,7 @@ def scrape_product(url, category_slug, product_code):
             page.wait_for_selector(".one_box_footer", timeout=15000)
         except Exception:
             page.wait_for_timeout(3000)
-        
+
         html_content = page.content()
         browser.close()
 
@@ -91,14 +92,23 @@ def scrape_product(url, category_slug, product_code):
             "videos": ""
         },
         "title": {
-            "zh": title_zh
+            "zh": title_zh,
+            "en": "",
+            "es": "",
+            "fr": "",
+            "ar": ""
         },
         "description": {
-            "zh": description_text
+            "zh": description_text,
+            "en": "",
+            "es": "",
+            "fr": "",
+            "ar": ""
         }
     }
 
     return product_data
+
 
 def main():
     products_config = []
@@ -118,6 +128,7 @@ def main():
         json.dump(products, jf, ensure_ascii=False, indent=2)
 
     print(f"Successfully scraped {len(products)} products and saved to {output_json}")
+
 
 if __name__ == "__main__":
     main()
