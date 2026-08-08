@@ -1,7 +1,7 @@
 import os
 import json
+import csv
 import requests
-from urllib.parse import urlparse, parse_qs
 from playwright.sync_api import sync_playwright
 
 def scrape_product(url, brand, model, product_code):
@@ -101,10 +101,11 @@ def scrape_product(url, brand, model, product_code):
     return product_data
 
 def main():
-    products_config = [
-        ("https://gxhy1688.com/detailIndex?marketCode=gz&code=864406250", "rolex", "submariner", "864406250"),
-        ("https://gxhy1688.com/detailIndex?marketCode=gz&code=864406255", "rolex", "submariner", "864406255")
-    ]
+    products_config = []
+    with open("products.csv", "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            products_config.append((row["url"], row["brand"], row["model"], row["product_code"]))
 
     products = []
     for url, brand, model, product_code in products_config:
