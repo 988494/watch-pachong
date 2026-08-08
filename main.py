@@ -4,7 +4,7 @@ import csv
 import requests
 from playwright.sync_api import sync_playwright
 
-def scrape_product(url, brand, model, product_code):
+def scrape_product(url, category_slug, product_code):
     print(f"Scraping URL: {url}")
 
     with sync_playwright() as p:
@@ -44,8 +44,8 @@ def scrape_product(url, brand, model, product_code):
 
     print(f"Found {len(img_urls)} images.")
 
-    slug = f"{brand}-{model}-{product_code}"
-    folder_name = slug
+    product_slug = f"{category_slug}-{product_code}"
+    folder_name = product_slug
     img_dir = os.path.join("images", folder_name)
     os.makedirs(img_dir, exist_ok=True)
 
@@ -54,7 +54,7 @@ def scrape_product(url, brand, model, product_code):
         ext = os.path.splitext(img_url.split("?")[0])[1]
         if not ext:
             ext = ".jpg"
-        filename = f"{slug}-{idx}{ext}"
+        filename = f"{idx}{ext}"
         dest_path = os.path.join(img_dir, filename)
 
         print(f"Downloading {img_url} -> {dest_path}")
@@ -68,10 +68,10 @@ def scrape_product(url, brand, model, product_code):
         except Exception as e:
             print(f"Error downloading {img_url}: {e}")
 
-        rel_path = f"/images/{folder_name}/{filename}"
+        rel_path = f"/images/{folder_name}/{idx}{ext}"
         downloaded_image_paths.append(rel_path)
 
-    cover_path = downloaded_image_paths[0] if downloaded_image_paths else f"/images/{folder_name}/{slug}-0.jpg"
+    cover_path = downloaded_image_paths[0] if downloaded_image_paths else f"/images/{folder_name}/0{ext}"
     media_images_str = ",".join(downloaded_image_paths)
 
     title_zh = product_code
@@ -81,8 +81,8 @@ def scrape_product(url, brand, model, product_code):
             title_zh = lines[0].strip()
 
     product_data = {
-        "slug": slug,
-        "category": model,
+        "product_slug": product_slug,
+        "category_slug": category_slug,
         "price": price,
         "price_original": 0,
         "cover": cover_path,
@@ -105,11 +105,11 @@ def main():
     with open("products.csv", "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            products_config.append((row["url"], row["brand"], row["model"], row["product_code"]))
+            products_config.append((row["url"], row["category_slug"], row["product_code"]))
 
     products = []
-    for url, brand, model, product_code in products_config:
-        prod = scrape_product(url, brand, model, product_code)
+    for url, category_slug, product_code in products_config:
+        prod = scrape_product(url, category_slug, product_code)
         if prod:
             products.append(prod)
 
